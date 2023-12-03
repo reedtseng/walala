@@ -54,7 +54,7 @@ def process_command(command):
         case value if value.startswith('新增追蹤'):
             track_body = value[4:]
             lines = re.split(r'\s|,|，|;', track_body)
-            symbol, target = None, None
+            stock, target = None, None
             for line in lines:
                 match line:
                     case v if v.startswith("股票"):
