@@ -82,8 +82,7 @@ def process_command(command):
                         "target": target,
                         "date": None,
                     }
-                    response += f"\n已新增股票追蹤 {stock_code}{
-                        stock_name}，目標價為 {target}"
+                    response += f"\n已新增股票追蹤 {stock_code}{stock_name}，目標價為 {target}"
         case value if value.startswith('刪除追蹤'):
             stock = value[4:]
             ticker = ticker_tracks.pop(stock + ".tw", None)
