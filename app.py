@@ -15,6 +15,18 @@ tw_stocks = {
 }
 reversed_stocks = {}
 
+
+def load_tw_stocks():
+    with open('tw_stocks.txt', 'r', encoding='utf-8') as file:
+        for line in file:
+            key, value = line.strip().split(':')
+            tw_stocks[key] = value
+    print(tw_stocks)
+    for key, value in tw_stocks.items():
+        reversed_stocks[value] = key
+    print(reversed_stocks)
+
+
 load_tw_stocks()
 app = Flask(__name__)
 
@@ -37,17 +49,6 @@ ticker_tracks = {
 }
 
 TRACK_ADD_TIP = "格式應為 股票:[台股代號或名稱] 目標價:[價格]"
-
-
-def load_tw_stocks():
-    with open('tw_stocks.txt', 'r', encoding='utf-8') as file:
-        for line in file:
-            key, value = line.strip().split(':')
-            tw_stocks[key] = value
-    print(tw_stocks)
-    for key, value in tw_stocks.items():
-        reversed_stocks[value] = key
-    print(reversed_stocks)
 
 
 def process_command(command):
