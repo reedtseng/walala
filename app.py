@@ -5,9 +5,9 @@ from linebot.models import MessageEvent, TextMessage, TextSendMessage
 import os
 import re
 import time
-import requests
-from bs4 import BeautifulSoup
-from lxml import etree
+# import requests
+# from bs4 import BeautifulSoup
+# from lxml import etree
 
 tw_stocks = {
     "2330": "台積電",
@@ -48,26 +48,26 @@ ticker_tracks = {
         "code": "6279",
         "name": "胡連",
         "target": 150,
-        "short_term": os.environ['tw.6279'],
+        "short_term": os.environ.get('tw.6279', "\n無相關資料"),
         "date": None
     }
 }
 
 
-def crawl_data():
-    # 執行爬蟲的程式碼
-    # ...
-    # 發送 HTTP 請求並獲取網頁內容
-    for ticker in ticker_tracks.values():
-        url = f"https://tw.stock.yahoo.com/quote/{ticker["code"]}"
-        response = requests.get(url)
-        html = response.text
-        # 使用 lxml 解析 HTML
-        tree = etree.HTML(html)
-        # 使用 XPath 定位所需的資料
-        xpath_expression = "//html/body/div[1]/div/div/div/div/div[4]/div/div[1]/div/div[1]/div/div[2]/div[1]/div/span[1]"
-        price = tree.xpath(xpath_expression)
-        print(f"{ticker["code"]} {price}")
+# def crawl_data():
+#     # 執行爬蟲的程式碼
+#     # ...
+#     # 發送 HTTP 請求並獲取網頁內容
+#     for ticker in ticker_tracks.values():
+#         url = f"https://tw.stock.yahoo.com/quote/{ticker["code"]}"
+#         response = requests.get(url)
+#         html = response.text
+#         # 使用 lxml 解析 HTML
+#         tree = etree.HTML(html)
+#         # 使用 XPath 定位所需的資料
+#         xpath_expression = "//html/body/div[1]/div/div/div/div/div[4]/div/div[1]/div/div[1]/div/div[2]/div[1]/div/span[1]"
+#         price = tree.xpath(xpath_expression)
+#         print(f"{ticker["code"]} {price}")
 
 
 # 設定爬蟲的執行間隔（以秒為單位）
