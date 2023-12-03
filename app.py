@@ -4,6 +4,10 @@ from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage
 import os
 import re
+import time
+import requests
+from bs4 import BeautifulSoup
+from lxml import etree
 
 tw_stocks = {
     "2330": "台積電",
@@ -44,11 +48,101 @@ ticker_tracks = {
         "code": "6279",
         "name": "胡連",
         "target": 150,
+        "short_term": os.environ['tw.6279'],
         "date": None
     }
 }
 
+
+def crawl_data():
+    # 執行爬蟲的程式碼
+    # ...
+    # 發送 HTTP 請求並獲取網頁內容
+    for ticker in ticker_tracks.values():
+        url = f"https://tw.stock.yahoo.com/quote/{ticker["code"]}"
+        response = requests.get(url)
+        html = response.text
+        # 使用 lxml 解析 HTML
+        tree = etree.HTML(html)
+        # 使用 XPath 定位所需的資料
+        xpath_expression = "//html/body/div[1]/div/div/div/div/div[4]/div/div[1]/div/div[1]/div/div[2]/div[1]/div/span[1]"
+        price = tree.xpath(xpath_expression)
+        print(f"{ticker["code"]} {price}")
+
+
+# 設定爬蟲的執行間隔（以秒為單位）
+interval = 300  # 每隔 60 秒執行一次爬蟲
+# while True:
+#     crawl_data()  # 執行爬蟲
+#     # 等待指定的時間間隔
+#     time.sleep(interval)
+
 TRACK_ADD_TIP = "格式應為 股票:[台股代號或名稱] 目標價:[價格]"
+
+
+def list_tracks():
+    response = "\n追蹤清單如下："
+    for ticker in ticker_tracks.values():
+        track_info = f"{ticker["code"]}{ticker["name"]}"
+        response += f"\n股票名: {track_info}\n目標價: {ticker['target']}"
+    return response
+
+
+def add_track(track_body):
+    lines = re.split(r'\s|,|，|;', track_body)
+    stock, target = None, None
+    for line in lines:
+        match line:
+            case v if v.startswith("股票"):
+                stock = v.split(':')[1].strip()
+            case v if v.startswith("目標價"):
+                target = int(v.split(':')[1].strip())
+            case _:
+                pass
+    if stock is None:
+        return f"\n不好意思！沒按照正確格式新增股票。" + TRACK_ADD_TIP
+    elif target is None:
+        return f"\n不好意思！沒按照正確格式設定目標價。" + TRACK_ADD_TIP
+    else:
+        stock_code, stock_name = None, None
+        if stock in tw_stocks:
+            stock_code, stock_name = stock, tw_stocks[stock]
+        if stock in reversed_stocks:
+            stock_code, stock_name = reversed_stocks[stock], stock
+        if stock_code is None:
+            return f"\n抱歉！無該股票資訊 {stock}"
+        else:
+            ticker_tracks[f"{stock_code}.tw"] = {
+                "code": stock_code,
+                "name": stock_name,
+                "target": target,
+                "date": None,
+            }
+            track_info = f"{stock_code}{stock_name}"
+            return f"\n已新增股票追蹤 {track_info}，目標價為 {target}"
+
+
+def remove_track(stock):
+    ticker = ticker_tracks.pop(stock + ".tw", None)
+    if ticker is None:
+        stock_code = reversed_stocks.get(stock, None)
+        if stock_code is not None:
+            ticker = ticker_tracks.pop(stock_code + ".tw", None)
+    if ticker is None:
+        return f"\n無追蹤此股票 {stock}!"
+    else:
+        return f"\n已刪除此追蹤 {stock}!"
+
+
+def short_term_outloop(stock):
+    ticker = ticker_tracks.get(stock + ".tw", None)
+    if ticker is None:
+        stock_code = reversed_stocks.get(stock[:2], None)
+        if stock_code is not None:
+            ticker = ticker_tracks.get(stock_code + ".tw", None)
+    if ticker is None:
+        return f"\n無此股票資訊 {stock}!"
+    return ticker["short_term"]
 
 
 def process_command(command):
@@ -56,54 +150,16 @@ def process_command(command):
     response = f"指令內容: {command}\n"
     match command:
         case value if "追蹤清單" in value:
-            response += "\n追蹤清單如下："
-            for ticker in ticker_tracks.values():
-                print(ticker)
-                response += f"\n股票名: {ticker['name']}\n目標價: {ticker['target']}"
+            response += list_tracks()
         case value if value.startswith('新增追蹤'):
             track_body = value[4:]
-            lines = re.split(r'\s|,|，|;', track_body)
-            stock, target = None, None
-            for line in lines:
-                match line:
-                    case v if v.startswith("股票"):
-                        stock = v.split(':')[1].strip()
-                    case v if v.startswith("目標價"):
-                        target = int(v.split(':')[1].strip())
-                    case _:
-                        pass
-            if stock is None:
-                response += f"\n不好意思！沒按照正確格式新增股票。" + TRACK_ADD_TIP
-            elif target is None:
-                response += f"\n不好意思！沒按照正確格式設定目標價。" + TRACK_ADD_TIP
-            else:
-                stock_code, stock_name = None, None
-                if stock in tw_stocks:
-                    stock_code, stock_name = stock, tw_stocks[stock]
-                if stock in reversed_stocks:
-                    stock_code, stock_name = reversed_stocks[stock], stock
-                if stock_code is None:
-                    response += f"\n抱歉！無該股票資訊 {stock}"
-                else:
-                    ticker_tracks[f"{stock_code}.tw"] = {
-                        "code": stock_code,
-                        "name": stock_name,
-                        "target": target,
-                        "date": None,
-                    }
-                    track_info = f"{stock_code}{stock_name}"
-                    response += f"\n已新增股票追蹤 {track_info}，目標價為 {target}"
+            response += add_track(track_body)
         case value if value.startswith('刪除追蹤'):
             stock = value[4:]
-            ticker = ticker_tracks.pop(stock + ".tw", None)
-            if ticker is None:
-                stock_code = reversed_stocks.get(stock, None)
-                if stock_code is not None:
-                    ticker = ticker_tracks.pop(stock_code + ".tw", None)
-            if ticker is None:
-                response += f"\n無追蹤此股票 {stock}!"
-            else:
-                response += f"\n已刪除此追蹤 {stock}!"
+            response += remove_track(stock)
+        case value if "近期" in value:
+            stock = value[:4]
+            response += short_term_outloop(stock)
         case _:
             response += "\n不好意思，能力有限，目前無法做到。"
     return response
