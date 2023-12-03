@@ -5,6 +5,17 @@ from linebot.models import MessageEvent, TextMessage, TextSendMessage
 import os
 import re
 
+tw_stocks = {
+    "2330": "台積電",
+    "2412": "中華電",
+    "3293":	"鈊象",
+    "3443":	"創意",
+    "3661": "世芯-KY",
+    "6669":	"緯穎",
+}
+reversed_stocks = {}
+
+load_tw_stocks()
 app = Flask(__name__)
 
 line_bot_api = LineBotApi(os.environ['CHANNEL_ACCESS_TOKEN'])
@@ -26,16 +37,6 @@ ticker_tracks = {
 }
 
 TRACK_ADD_TIP = "格式應為 股票:[台股代號或名稱] 目標價:[價格]"
-
-tw_stocks = {
-    "2330": "台積電",
-    "2412": "中華電",
-    "3293":	"鈊象",
-    "3443":	"創意",
-    "3661": "世芯-KY",
-    "6669":	"緯穎",
-}
-reversed_stocks = {}
 
 
 def load_tw_stocks():
@@ -143,6 +144,5 @@ def hello():
 
 
 if __name__ == "__main__":
-    load_tw_stocks()
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
