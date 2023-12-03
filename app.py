@@ -83,7 +83,7 @@ TRACK_ADD_TIP = "格式應為 股票:[台股代號或名稱] 目標價:[價格]"
 def list_tracks():
     response = "\n追蹤清單如下："
     for ticker in ticker_tracks.values():
-        track_info = f"{ticker["code"]}{ticker["name"]}"
+        track_info = f"{ticker['code']}{ticker['name']}"
         response += f"\n股票名: {track_info}\n目標價: {ticker['target']}"
     return response
 
