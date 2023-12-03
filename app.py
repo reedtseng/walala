@@ -50,7 +50,7 @@ def process_command(command):
             response += "\n追蹤清單如下："
             for ticker in ticker_tracks.values():
                 print(ticker)
-                response += f"\n股票名: {ticker["name"]}\n目標價: {ticker["target"]}"
+                response += f"\n股票名: {ticker['name']}\n目標價: {ticker['target']}"
         case value if value.startswith('新增追蹤'):
             track_body = value[4:]
             lines = re.split(r'\s|,|，|;', track_body)
@@ -82,7 +82,8 @@ def process_command(command):
                         "target": target,
                         "date": None,
                     }
-                    response += f"\n已新增股票追蹤 {stock_code}{stock_name}，目標價為 {target}"
+                    response += f"\n已新增股票追蹤 {stock_code}{
+                        stock_name}，目標價為 {target}"
         case value if value.startswith('刪除追蹤'):
             stock = value[4:]
             ticker = ticker_tracks.pop(stock + ".tw", None)
