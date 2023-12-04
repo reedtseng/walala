@@ -8,6 +8,13 @@ import time
 # import requests
 # from bs4 import BeautifulSoup
 # from lxml import etree
+from langchain.schema import (
+    AIMessage,
+    HumanMessage,
+    SystemMessage
+)
+
+from common import chat_llm
 
 tw_stocks = {
     "2330": "台積電",
@@ -48,7 +55,7 @@ ticker_tracks = {
         "code": "6279",
         "name": "胡連",
         "target": 150,
-        "short_term": os.environ.get('tw.6279', "\n無相關資料"),
+        "short_term": os.environ.get('TW.6279', "\n無相關資料"),
         "date": None
     }
 }
@@ -161,7 +168,12 @@ def process_command(command):
             stock = value[:4]
             response += short_term_outloop(stock)
         case _:
-            response += "\n不好意思，能力有限，目前無法做到。"
+            message = chat_llm.predict_messages([
+                SystemMessage(
+                    content="Your name is 'Walala' or simply 'Wala'. You are a amiable stock-track bot."),
+                HumanMessage(content=command)
+            ])
+            response += ("\n" + message.content)
     return response
 
 
@@ -188,7 +200,7 @@ def callback():
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
 
-    if "WALA" in event.message.text.upper():
+    if event.message.text.upper().startswith("WALA"):
         command = event.message.text[4:]
         response = process_command(command)
         message = TextSendMessage(text=response)
