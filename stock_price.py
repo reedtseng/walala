@@ -11,11 +11,11 @@ yesterday = today - timedelta(days=1)
 
 tw_stocks = {
     "0050": {
-        "aliases": ["元大台灣50"],
+        "aliases": ["0050.TW", "元大台灣50"],
         "price": None,
     },
     "2317": {
-        "aliases": ["鴻海", "海公公", "阿海"],
+        "aliases": ["2317.TW", "鴻海", "海公公", "阿海"],
         "price": None,
     },
     "2330": {
@@ -23,27 +23,27 @@ tw_stocks = {
         "price": None,
     },
     "2412": {
-        "aliases": ["中華電", "種花"],
+        "aliases": ["2412.TW", "中華電", "種花"],
         "price": None,
     },
     "3293":	{
-        "aliases": ["鈊象", "小象"],
+        "aliases": ["3293.TW", "鈊象", "小象"],
         "price": None,
     },
     "3443":	{
-        "aliases": ["創意"],
+        "aliases": ["3443.TW", "創意"],
         "price": None,
     },
     "3661": {
-        "aliases": ["世芯", "世芯-KY"],
+        "aliases": ["3661.TW", "世芯", "世芯-KY"],
         "price": None,
     },
     "6279": {
-        "aliases": ["胡連", "小胡"],
+        "aliases": ["6279.TW", "胡連", "小胡"],
         "price": None,
     },
     "6669":	{
-        "aliases": ["緯穎"],
+        "aliases": ["6669.TW", "緯穎"],
         "price": None,
     },
 }
