@@ -41,6 +41,7 @@ tw_stocks = {
     "6279": {
         "aliases": ["胡連", "小胡"],
         "price": None,
+    },
     "6669":	{
         "aliases": ["緯穎"],
         "price": None,
