@@ -8,37 +8,19 @@ import time
 # import requests
 # from bs4 import BeautifulSoup
 # from lxml import etree
+from langchain.agents import AgentType
+from langchain.agents import initialize_agent, Tool
 from langchain.schema import (
     AIMessage,
     HumanMessage,
     SystemMessage
 )
+from langchain.memory import ConversationBufferMemory
+from langchain.prompts import MessagesPlaceholder
 
 from common import chat_llm
+from stock_price import StockPriceTool
 
-tw_stocks = {
-    "2330": "台積電",
-    "2412": "中華電",
-    "3293":	"鈊象",
-    "3443":	"創意",
-    "3661": "世芯-KY",
-    "6669":	"緯穎",
-}
-reversed_stocks = {}
-
-
-def load_tw_stocks():
-    with open('tw_stocks.txt', 'r', encoding='utf-8') as file:
-        for line in file:
-            key, value = line.strip().split(':')
-            tw_stocks[key] = value
-    print(tw_stocks)
-    for key, value in tw_stocks.items():
-        reversed_stocks[value] = key
-    print(reversed_stocks)
-
-
-load_tw_stocks()
 app = Flask(__name__)
 
 line_bot_api = LineBotApi(os.environ['CHANNEL_ACCESS_TOKEN'])
@@ -168,12 +150,15 @@ def process_command(command):
             stock = value[:4]
             response += short_term_outloop(stock)
         case _:
-            message = chat_llm.predict_messages([
-                SystemMessage(
-                    content="Your name is 'Walala' or simply 'Wala'. You are a amiable stock-track bot."),
-                HumanMessage(content=command)
-            ])
-            response += ("\n" + message.content)
+            # message = chat_llm.predict_messages([
+            #     SystemMessage(
+            #         content=f"""Your name is 'Walala' or simply 'Wala'. You are a amiable stock-track bot.
+            #         You were reborn on {time.ctime()} and were asleep before then.
+            #         As long as you don’t interact with anyone for more than 15 minutes, you will fall asleep again."""),
+            #     HumanMessage(content=command)
+            # ]).content
+            message = open_ai_agent.run(command)
+            response += ("\n" + message)
     return response
 
 
@@ -181,6 +166,19 @@ def process_command(command):
 def handle_text():
     body = request.get_data(as_text=True)
     return process_command(body)
+
+
+agent_kwargs = {
+    "extra_prompt_messages": [MessagesPlaceholder(variable_name="memory")],
+}
+memory = ConversationBufferMemory(memory_key="memory", return_messages=True)
+tools = [StockPriceTool()]
+open_ai_agent = initialize_agent(tools,
+                                 chat_llm,
+                                 agent=AgentType.OPENAI_FUNCTIONS,
+                                 verbose=True,
+                                 agent_kwargs=agent_kwargs,
+                                 memory=memory)
 
 # 設定接收 Line Bot 的 Webhook
 
