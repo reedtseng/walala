@@ -10,8 +10,20 @@ from common import chat_llm
 from linebot import (
     AsyncLineBotApi, WebhookParser
 )
+from linebot.aiohttp_async_http_client import AiohttpAsyncHttpClient
+from linebot.exceptions import (
+    InvalidSignatureError
+)
+from linebot.models import (
+    MessageEvent, TextMessage, TextSendMessage,
+)
 
 app = FastAPI()
+session = aiohttp.ClientSession()
+async_http_client = AiohttpAsyncHttpClient(session)
+line_bot_api = AsyncLineBotApi(
+    os.getenv('CHANNEL_ACCESS_TOKEN'), async_http_client)
+parser = WebhookParser(os.getenv('CHANNEL_SECRET'))
 
 
 @app.get("/")
