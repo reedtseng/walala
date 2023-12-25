@@ -49,10 +49,19 @@ async def handle_callback(request: Request):
             continue
         if not isinstance(event.message, TextMessage):
             continue
+        if event.message.text.upper().startswith("WALA"):
+            command = event.message.text[4:]
+        elif event.message.text.upper().startswith("WALALA"):
+            command = event.message.text[6:]
+        elif event.message.text.upper().startswith("/"):
+            command = event.message.text[1:]
+        else:
+            continue
 
+        # response = process_command(command)
         # tool_result = open_ai_agent.run(event.message.text)
 
         await line_bot_api.reply_message(
             event.reply_token,
-            TextSendMessage(text='tool_result')
+            TextSendMessage(text='response')
         )

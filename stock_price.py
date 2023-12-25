@@ -26,6 +26,10 @@ tw_stocks = {
         "aliases": ["2412.TW", "中華電", "種花"],
         "price": None,
     },
+    "2883": {
+        "aliases": ["2883.TW", "開發金", "開發"],
+        "price": None,
+    },
     "3293":	{
         "aliases": ["3293.TW", "鈊象", "小象"],
         "price": None,
